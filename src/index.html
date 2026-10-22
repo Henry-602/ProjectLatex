@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LaTeX 公式助手</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%235664f5'/%3E%3Ctext x='50' y='74' font-size='64' text-anchor='middle' fill='%23ffffff' font-family='Georgia,serif'%3E%E2%88%91%3C/text%3E%3C/svg%3E">
+<!--KATEX_CSS-->
+<!--APP_CSS-->
+</head>
+<body>
+<div id="bgLayer" aria-hidden="true"></div>
+<div id="bgScrim" aria-hidden="true"></div>
+
+<div id="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">∑</div>
+      <div class="brand-text">
+        <div class="brand-name">LaTeX 公式助手</div>
+      </div>
+    </div>
+
+    <div class="mode-switch" id="modeSwitch" role="tablist" aria-label="模式切换">
+      <span class="mode-indicator" id="modeIndicator"></span>
+      <button class="mode-btn active" data-mode="formula" role="tab" aria-selected="true">公式模式</button>
+      <button class="mode-btn" data-mode="exercise" role="tab" aria-selected="false">习题模式</button>
+    </div>
+
+    <div class="top-actions">
+      <button class="icon-btn" id="paletteBtn" title="快捷输入（Ctrl+/）" aria-label="快捷输入" aria-expanded="false">
+        <span class="sigma" aria-hidden="true">∑</span>
+      </button>
+      <button class="icon-btn" id="themeBtn" title="切换主题" aria-label="切换主题">
+        <svg id="iconMoon" viewBox="0 0 24 24"><path d="M20.5 14.3A8.6 8.6 0 0 1 9.7 3.5 8.6 8.6 0 1 0 20.5 14.3Z"/></svg>
+        <svg id="iconSun" viewBox="0 0 24 24" class="hidden"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"/></svg>
+      </button>
+      <button class="icon-btn" id="helpBtn" title="使用说明" aria-label="使用说明">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.4 9.4a2.7 2.7 0 1 1 3.9 2.4c-.8.4-1.3 1-1.3 1.9"/><circle cx="12" cy="17.2" r=".9" fill="currentColor" stroke="none"/></svg>
+      </button>
+      <button class="icon-btn" id="settingsBtn" title="设置" aria-label="设置">
+        <svg viewBox="0 0 24 24"><path d="M4 7.5h9M17.5 7.5H20M4 16.5h2.5M11 16.5h9"/><circle cx="15" cy="7.5" r="2.3"/><circle cx="9" cy="16.5" r="2.3"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <section class="palette collapsed" id="palette">
+    <div class="palette-bar">
+      <button class="palette-toggle" id="paletteToggle" aria-expanded="false" aria-controls="paletteGrid" title="展开快捷输入">
+        <span class="pt-icon" aria-hidden="true">∑</span>
+        <span>快捷输入</span>
+        <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div class="palette-tabs" id="paletteTabs" role="tablist" aria-label="符号分类"></div>
+      <button class="ghost-btn hidden" id="customManage" title="管理自定义公式">管理</button>
+    </div>
+    <div class="palette-grid" id="paletteGrid"></div>
+  </section>
+
+  <section class="view" id="formulaView">
+    <div class="pane" id="editorPane">
+      <div class="pane-head">
+        <span class="pane-title">输入区</span>
+        <span class="spacer"></span>
+        <span class="pane-stat" id="inputStat"></span>
+      </div>
+      <textarea id="formulaInput" class="code-input js-editor" spellcheck="false" autocomplete="off" autocapitalize="off"
+        placeholder="$f(x)=\lim_{n\to\infty}\left(1+\frac{x}{n}\right)^n$"></textarea>
+    </div>
+
+    <div class="splitter" id="splitter" role="separator" aria-orientation="horizontal" title="拖动调整输入区高度"><span></span></div>
+
+    <div class="pane preview-pane">
+      <div class="pane-head">
+        <span class="pane-title">预览区</span>
+        <span class="spacer"></span>
+        <span class="pane-stat" id="previewStat"></span>
+      </div>
+      <div class="preview" id="preview"></div>
+    </div>
+  </section>
+
+  <section class="view hidden" id="exerciseView">
+    <div class="exer-head">
+      <div class="exer-title">习题栏</div>
+      <div class="exer-head-actions">
+        <button class="ghost-btn" id="renumberBtn" title="按当前顺序重排为 1、2、3…">重排题号</button>
+        <button class="ghost-btn danger" id="clearExBtn">清空</button>
+      </div>
+    </div>
+
+    <div class="exercise-list" id="exerciseList"></div>
+
+    <button class="add-exercise" id="addExercise"><span>＋</span> 添加习题</button>
+
+    <div class="exer-footer">
+      <span class="exer-count" id="exCount"></span>
+      <button class="primary-btn" id="exportBtn">导出 LaTeX 公式</button>
+    </div>
+  </section>
+</div>
+
+<div id="tooltip" class="hidden" role="tooltip"></div>
+
+<div class="modal-backdrop hidden" id="modalBackdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head">
+      <h2 id="modalTitle">导出 LaTeX</h2>
+      <button class="icon-btn modal-close" id="modalClose" aria-label="关闭">
+        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="modal-left">
+        <div id="validation"></div>
+        <div id="exportHints"></div>
+
+        <div class="field">
+          <div class="field-label">题号格式</div>
+          <div class="pill-grid" id="bracketOpts" role="radiogroup" aria-label="题号格式"></div>
+          <div class="inline-hint" id="bracketHint"></div>
+          <label class="check-row"><input type="checkbox" id="nbspOpt"> 西文括号后改用 <code>~</code>（不可断行空格）</label>
+        </div>
+
+        <div class="field">
+          <div class="field-label">换行方式</div>
+          <div class="pill-grid three" id="sepOpts" role="radiogroup" aria-label="换行方式"></div>
+          <div class="inline-hint" id="sepHint"></div>
+        </div>
+
+        <div class="field" style="margin-bottom:0">
+          <div class="field-label">包裹方式</div>
+          <div class="pill-grid three" id="wrapOpts" role="radiogroup" aria-label="包裹方式"></div>
+        </div>
+      </div>
+
+      <div class="modal-right">
+        <div class="export-tabs" role="tablist" aria-label="导出内容视图">
+          <button class="export-tab active" data-tab="code" role="tab" aria-selected="true">LaTeX 源码</button>
+          <button class="export-tab" data-tab="render" role="tab" aria-selected="false">渲染预览</button>
+        </div>
+        <pre class="export-pre" id="exportPre"></pre>
+        <div class="export-render hidden" id="exportRender" role="tabpanel"></div>
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <span class="info" id="exportInfo"></span>
+      <button class="btn" id="copyExport">复制</button>
+      <button class="btn" id="downloadExport">下载 .tex</button>
+      <button class="btn primary" id="exportDone">完成</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop hidden" id="customModal">
+  <div class="modal custom-modal" role="dialog" aria-modal="true" aria-labelledby="customTitle">
+    <div class="modal-head">
+      <h2 id="customTitle">新建快捷公式</h2>
+      <button class="icon-btn modal-close" id="customClose" aria-label="关闭">
+        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-body custom-body">
+      <label class="c-field">
+        <span>名称</span>
+        <input type="text" id="customName" placeholder="例如：定积分" autocomplete="off">
+      </label>
+      <label class="c-field">
+        <span>注释</span>
+        <input type="text" id="customNote" placeholder="例如：在 a 到 b 上积分" autocomplete="off">
+      </label>
+      <label class="c-field">
+        <span>图标公式</span>
+        <input type="text" id="customIcon" placeholder="\int_{a}^{b}" autocomplete="off" spellcheck="false">
+      </label>
+      <div class="c-preview">
+        <span class="c-preview-label">预览</span>
+        <div class="c-preview-box" id="customPreview"></div>
+      </div>
+      <div class="c-error hidden" id="customError"></div>
+      <label class="c-field">
+        <span>插入内容</span>
+        <textarea id="customCode" rows="3" placeholder="\int_{a}^{b} f(x)\,\mathrm{d}x" spellcheck="false"></textarea>
+      </label>
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn danger hidden" id="customDelete">删除</button>
+      <span class="spacer"></span>
+      <button class="btn" id="customCancel">取消</button>
+      <button class="btn primary" id="customSave">保存</button>
+    </div>
+  </div>
+</div>
+
+<div id="settingsPop" class="popover hidden" role="dialog" aria-label="设置">
+  <div class="pop-title">
+    <span>设置</span>
+    <button class="icon-btn close" id="settingsClose" aria-label="关闭设置">
+      <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+  </div>
+
+  <div class="setting">
+    <div class="setting-label">主题</div>
+    <div class="seg" id="themeSeg">
+      <button data-theme="light">浅色</button>
+      <button data-theme="dark">深色</button>
+      <button data-theme="auto">跟随系统</button>
+    </div>
+  </div>
+
+  <div class="setting">
+    <div class="setting-label">背景图片 <span class="val" id="bgName">未设置</span></div>
+    <div style="display:flex;gap:6px">
+      <button class="ghost-btn" id="bgPick" style="flex:1">选择图片…</button>
+      <button class="ghost-btn" id="bgClear">移除</button>
+    </div>
+    <input type="file" id="bgFile" accept="image/*" hidden>
+  </div>
+
+  <div class="setting">
+    <div class="setting-label">背景不透明度 <span class="val" id="bgOpacityVal">45%</span></div>
+    <input type="range" id="bgOpacity" min="0" max="100" step="1" value="45">
+  </div>
+
+  <div class="setting">
+    <div class="setting-label">背景模糊 <span class="val" id="bgBlurVal">8px</span></div>
+    <input type="range" id="bgBlur" min="0" max="40" step="1" value="8">
+  </div>
+
+  <div class="setting">
+    <div class="switch-row">
+      <div>自动补全 <code>$</code> 与括号</div>
+      <button class="switch on" id="pairSwitch" role="switch" aria-checked="true"></button>
+    </div>
+    <div class="switch-row">
+      <div>插入符号时自动补 <code>$</code></div>
+      <button class="switch on" id="wrapSwitch" role="switch" aria-checked="true"></button>
+    </div>
+    <div class="switch-row">
+      <div>$ 补全优化</div>
+      <button class="switch on" id="smartDollarSwitch" role="switch" aria-checked="true" aria-describedby="smartDollarNote"></button>
+    </div>
+    <div class="switch-note" id="smartDollarNote">光标已在 <code>$…$</code> 内时，输入的 <code>$</code> 只补一个结束符</div>
+  </div>
+</div>
+
+<div id="helpPop" class="popover hidden" role="dialog" aria-label="使用说明">
+  <div class="pop-title">
+    <span>使用说明</span>
+    <button class="icon-btn close" id="helpClose" aria-label="关闭说明">
+      <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+  </div>
+  <ol class="help-list">
+    <li><b>公式模式</b>：上半区写纯文本，数学内容用 <code>$…$</code> 或 <code>$$…$$</code> 包裹，下半区实时渲染并标出语法错误。</li>
+    <li><b>习题模式</b>：点击「＋ 添加习题」增加习题栏；左框填题号，右框写公式。导出时逐题检查，错误精确到题号。</li>
+    <li><b>快捷输入</b>：默认收起，点右上角 <b>∑</b> 或按 <span class="kbd">Ctrl</span> + <span class="kbd">/</span> 展开；点击插入，悬停可看效果与写法。分段函数、align 在「矩阵·分段」里；「自定义」里可以添加自己的按钮。</li>
+    <li><b>自动补全</b>：输入 <code>$</code>、<code>{</code>、<code>(</code>、<code>[</code> 会自动成对；连续快速按两次 <code>$</code> 可得到 <code>$$…$$</code>。</li>
+    <li><b>主题与背景</b>：右上角齿轮可选择主题、上传背景并调节不透明度与模糊。</li>
+    <li>数据自动保存在本机浏览器里，关闭页面不会丢失。</li>
+  </ol>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!--PALETTE_JS-->
+<!--KATEX_JS-->
+<!--APP_JS-->
+</body>
+</html>

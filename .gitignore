@@ -1,0 +1,9 @@
+node_modules/
+_test/
+_build/
+*.log
+.DS_Store
+Thumbs.db
+desktop.ini
+.env
+*.token
