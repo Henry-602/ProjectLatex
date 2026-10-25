@@ -1166,6 +1166,14 @@ html[data-theme="dark"] .issue:hover { background: rgba(255, 255, 255, 0.06); }
 .setting-label { font-size: 12px; font-weight: 600; margin-bottom: 7px; display: flex; justify-content: space-between; align-items: center; }
 .setting-label .val { font-weight: 400; color: var(--muted); font-variant-numeric: tabular-nums; font-size: 11.5px; }
 
+.danger-zone { padding-bottom: 0; }
+.danger-zone .ghost-btn { width: 100%; }
+.danger-zone .ghost-btn.danger:hover {
+  color: var(--danger);
+  background: var(--danger-soft);
+  border-color: color-mix(in srgb, var(--danger) 40%, transparent);
+}
+
 .seg { display: flex; gap: 2px; padding: 3px; background: var(--panel-sunken); border: 1px solid var(--border); border-radius: 9px; }
 .seg button {
   flex: 1;

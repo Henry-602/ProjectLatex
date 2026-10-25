@@ -185,7 +185,10 @@
     return s;
   }
 
+  let suppressSave = false;
+
   const saveNow = () => {
+    if (suppressSave) return;
     try {
       localStorage.setItem(STORE_KEY, JSON.stringify(state));
     } catch (e) {
@@ -1850,6 +1853,16 @@
 
     $('#bgPick').addEventListener('click', () => $('#bgFile').click());
     $('#bgClear').addEventListener('click', () => { resetBg(); toast('已移除背景'); });
+
+    $('#clearCacheBtn').addEventListener('click', () => {
+      if (!window.confirm('清除本地缓存？\n\n将删除浏览器中保存的公式、习题、主题、背景和自定义快捷公式，且无法恢复。')) return;
+      suppressSave = true;
+      try { localStorage.removeItem(STORE_KEY); } catch (e) { /* ignore */ }
+      state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+      closePopovers();
+      toast('已清除本地缓存');
+      setTimeout(() => location.reload(), 450);
+    });
     $('#bgFile').addEventListener('change', async (e) => {
       const file = e.target.files && e.target.files[0];
       if (!file) return;

@@ -1179,6 +1179,14 @@ html[data-theme="dark"] .issue:hover { background: rgba(255, 255, 255, 0.06); }
 .setting-label { font-size: 12px; font-weight: 600; margin-bottom: 7px; display: flex; justify-content: space-between; align-items: center; }
 .setting-label .val { font-weight: 400; color: var(--muted); font-variant-numeric: tabular-nums; font-size: 11.5px; }
 
+.danger-zone { padding-bottom: 0; }
+.danger-zone .ghost-btn { width: 100%; }
+.danger-zone .ghost-btn.danger:hover {
+  color: var(--danger);
+  background: var(--danger-soft);
+  border-color: color-mix(in srgb, var(--danger) 40%, transparent);
+}
+
 .seg { display: flex; gap: 2px; padding: 3px; background: var(--panel-sunken); border: 1px solid var(--border); border-radius: 9px; }
 .seg button {
   flex: 1;
@@ -1561,6 +1569,10 @@ button:focus-visible, .opt:focus-within { outline: 2px solid var(--accent); outl
       <button class="switch on" id="smartDollarSwitch" role="switch" aria-checked="true" aria-describedby="smartDollarNote"></button>
     </div>
     <div class="switch-note" id="smartDollarNote">光标已在 <code>$…$</code> 内时，输入的 <code>$</code> 只补一个结束符</div>
+  </div>
+
+  <div class="setting danger-zone">
+    <button class="ghost-btn danger" id="clearCacheBtn" title="删除浏览器中保存的公式、习题、主题、背景和自定义快捷公式">清除本地缓存</button>
   </div>
 </div>
 
@@ -2079,7 +2091,10 @@ button:focus-visible, .opt:focus-within { outline: 2px solid var(--accent); outl
     return s;
   }
 
+  let suppressSave = false;
+
   const saveNow = () => {
+    if (suppressSave) return;
     try {
       localStorage.setItem(STORE_KEY, JSON.stringify(state));
     } catch (e) {
@@ -3744,6 +3759,16 @@ button:focus-visible, .opt:focus-within { outline: 2px solid var(--accent); outl
 
     $('#bgPick').addEventListener('click', () => $('#bgFile').click());
     $('#bgClear').addEventListener('click', () => { resetBg(); toast('已移除背景'); });
+
+    $('#clearCacheBtn').addEventListener('click', () => {
+      if (!window.confirm('清除本地缓存？\n\n将删除浏览器中保存的公式、习题、主题、背景和自定义快捷公式，且无法恢复。')) return;
+      suppressSave = true;
+      try { localStorage.removeItem(STORE_KEY); } catch (e) { /* ignore */ }
+      state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+      closePopovers();
+      toast('已清除本地缓存');
+      setTimeout(() => location.reload(), 450);
+    });
     $('#bgFile').addEventListener('change', async (e) => {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
