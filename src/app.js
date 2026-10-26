@@ -1960,7 +1960,10 @@
       }
     });
 
-    window.addEventListener('resize', positionModeIndicator);
+    window.addEventListener('resize', () => {
+      fitTopbar();
+      positionModeIndicator();
+    });
   }
 
   function positionModeIndicator() {
@@ -1969,6 +1972,20 @@
     if (!active || !ind) return;
     ind.style.width = active.offsetWidth + 'px';
     ind.style.transform = 'translateX(' + (active.offsetLeft - 3) + 'px)';
+  }
+
+  // Hide the logo only when the top bar is genuinely too tight for it.
+  function fitTopbar() {
+    const topbar = $('.topbar');
+    const logo = $('.logo');
+    const mode = $('#modeSwitch');
+    if (!topbar || !logo || !mode) return;
+    topbar.classList.remove('no-brand');
+    const logoRect = logo.getBoundingClientRect();
+    const modeRect = mode.getBoundingClientRect();
+    const overlaps = logoRect.right > modeRect.left + 1;
+    const overflows = topbar.scrollWidth > topbar.clientWidth + 1;
+    if (overlaps || overflows) topbar.classList.add('no-brand');
   }
 
   function initSplitter() {
@@ -2015,10 +2032,16 @@
     switchMode(state.mode);
     renderPreview();
     updateInputStat();
+    fitTopbar();
 
     // Web fonts can change the button widths after the first paint.
     if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(positionModeIndicator).catch(() => {});
+      document.fonts.ready
+        .then(() => {
+          fitTopbar();
+          positionModeIndicator();
+        })
+        .catch(() => {});
     }
   }
 

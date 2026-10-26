@@ -157,6 +157,9 @@ html[data-theme="dark"] body::before {
   box-shadow: var(--shadow-sm);
 }
 
+/* Set by JS only when the logo would actually collide with the mode buttons. */
+.topbar.no-brand .brand { display: none; }
+
 .brand { display: flex; align-items: center; gap: 11px; min-width: 0; }
 
 .logo {
