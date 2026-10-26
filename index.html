@@ -193,6 +193,7 @@ html[data-theme="dark"] body::before {
 .mode-switch {
   position: relative;
   display: flex;
+  flex: none;
   gap: 2px;
   padding: 3px;
   margin-left: auto;
@@ -233,7 +234,7 @@ html[data-theme="dark"] body::before {
   pointer-events: none;
 }
 
-.top-actions { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+.top-actions { display: flex; flex: none; align-items: center; gap: 6px; margin-left: auto; }
 
 .icon-btn {
   appearance: none;
@@ -1321,6 +1322,36 @@ button:focus-visible, .opt:focus-within { outline: 2px solid var(--accent); outl
   .modal-left { border-right: 0; }
 }
 
+/* Narrow screens: fold the brand text, shorten the mode buttons, shrink the icons. */
+@media (max-width: 860px) {
+  .brand-text { display: none; }
+  .topbar { gap: 12px; }
+}
+
+@media (max-width: 720px) {
+  .topbar { padding: 0 10px; gap: 8px; }
+  .mode-btn { padding: 6px 12px; font-size: 12.5px; }
+  .mode-suffix { display: none; }
+  .icon-btn { width: 30px; height: 30px; }
+  .icon-btn svg { width: 17px; height: 17px; }
+  .top-actions { gap: 2px; }
+}
+
+@media (max-width: 560px) {
+  #app { padding: 8px 8px 10px; gap: 8px; }
+  .brand { display: none; }
+  .mode-switch { margin-left: 0; }
+  .mode-btn { padding: 6px 11px; }
+}
+
+@media (max-width: 400px) {
+  .topbar { padding: 0 8px; gap: 6px; }
+  .mode-btn { padding: 5px 9px; font-size: 12px; }
+  .icon-btn { width: 28px; height: 28px; }
+  .top-actions { gap: 0; }
+  .logo { width: 30px; height: 30px; font-size: 17px; }
+}
+
 @media (max-height: 720px) {
   .palette-grid { max-height: 76px; }
 }
@@ -1346,8 +1377,8 @@ button:focus-visible, .opt:focus-within { outline: 2px solid var(--accent); outl
 
     <div class="mode-switch" id="modeSwitch" role="tablist" aria-label="模式切换">
       <span class="mode-indicator" id="modeIndicator"></span>
-      <button class="mode-btn active" data-mode="formula" role="tab" aria-selected="true">公式模式</button>
-      <button class="mode-btn" data-mode="exercise" role="tab" aria-selected="false">习题模式</button>
+      <button class="mode-btn active" data-mode="formula" role="tab" aria-selected="true">公式<span class="mode-suffix">模式</span></button>
+      <button class="mode-btn" data-mode="exercise" role="tab" aria-selected="false">习题<span class="mode-suffix">模式</span></button>
     </div>
 
     <div class="top-actions">
