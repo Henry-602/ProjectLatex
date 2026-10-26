@@ -1339,7 +1339,6 @@ button:focus-visible, .opt:focus-within { outline: 2px solid var(--accent); outl
 
 @media (max-width: 560px) {
   #app { padding: 8px 8px 10px; gap: 8px; }
-  .brand { display: none; }
   .mode-switch { margin-left: 0; }
   .mode-btn { padding: 6px 11px; }
 }
@@ -3735,14 +3734,7 @@ button:focus-visible, .opt:focus-within { outline: 2px solid var(--accent); outl
     els.formulaView.classList.toggle('hidden', mode !== 'formula');
     els.exerciseView.classList.toggle('hidden', mode !== 'exercise');
 
-    requestAnimationFrame(() => {
-      const active = $('#modeSwitch .mode-btn.active');
-      const ind = $('#modeIndicator');
-      if (active && ind) {
-        ind.style.width = active.offsetWidth + 'px';
-        ind.style.transform = 'translateX(' + (active.offsetLeft - 3) + 'px)';
-      }
-    });
+    requestAnimationFrame(positionModeIndicator);
   }
 
   function bindEvents() {
@@ -3904,14 +3896,15 @@ button:focus-visible, .opt:focus-within { outline: 2px solid var(--accent); outl
       }
     });
 
-    window.addEventListener('resize', () => {
-      const active = $('#modeSwitch .mode-btn.active');
-      const ind = $('#modeIndicator');
-      if (active && ind) {
-        ind.style.width = active.offsetWidth + 'px';
-        ind.style.transform = 'translateX(' + (active.offsetLeft - 3) + 'px)';
-      }
-    });
+    window.addEventListener('resize', positionModeIndicator);
+  }
+
+  function positionModeIndicator() {
+    const active = $('#modeSwitch .mode-btn.active');
+    const ind = $('#modeIndicator');
+    if (!active || !ind) return;
+    ind.style.width = active.offsetWidth + 'px';
+    ind.style.transform = 'translateX(' + (active.offsetLeft - 3) + 'px)';
   }
 
   function initSplitter() {
@@ -3958,6 +3951,11 @@ button:focus-visible, .opt:focus-within { outline: 2px solid var(--accent); outl
     switchMode(state.mode);
     renderPreview();
     updateInputStat();
+
+    // Web fonts can change the button widths after the first paint.
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(positionModeIndicator).catch(() => {});
+    }
   }
 
   if (document.readyState === 'loading') {

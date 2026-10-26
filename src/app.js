@@ -1798,14 +1798,7 @@
     els.formulaView.classList.toggle('hidden', mode !== 'formula');
     els.exerciseView.classList.toggle('hidden', mode !== 'exercise');
 
-    requestAnimationFrame(() => {
-      const active = $('#modeSwitch .mode-btn.active');
-      const ind = $('#modeIndicator');
-      if (active && ind) {
-        ind.style.width = active.offsetWidth + 'px';
-        ind.style.transform = 'translateX(' + (active.offsetLeft - 3) + 'px)';
-      }
-    });
+    requestAnimationFrame(positionModeIndicator);
   }
 
   function bindEvents() {
@@ -1967,14 +1960,15 @@
       }
     });
 
-    window.addEventListener('resize', () => {
-      const active = $('#modeSwitch .mode-btn.active');
-      const ind = $('#modeIndicator');
-      if (active && ind) {
-        ind.style.width = active.offsetWidth + 'px';
-        ind.style.transform = 'translateX(' + (active.offsetLeft - 3) + 'px)';
-      }
-    });
+    window.addEventListener('resize', positionModeIndicator);
+  }
+
+  function positionModeIndicator() {
+    const active = $('#modeSwitch .mode-btn.active');
+    const ind = $('#modeIndicator');
+    if (!active || !ind) return;
+    ind.style.width = active.offsetWidth + 'px';
+    ind.style.transform = 'translateX(' + (active.offsetLeft - 3) + 'px)';
   }
 
   function initSplitter() {
@@ -2021,6 +2015,11 @@
     switchMode(state.mode);
     renderPreview();
     updateInputStat();
+
+    // Web fonts can change the button widths after the first paint.
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(positionModeIndicator).catch(() => {});
+    }
   }
 
   if (document.readyState === 'loading') {

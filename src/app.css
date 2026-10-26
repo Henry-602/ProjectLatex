@@ -1326,7 +1326,6 @@ button:focus-visible, .opt:focus-within { outline: 2px solid var(--accent); outl
 
 @media (max-width: 560px) {
   #app { padding: 8px 8px 10px; gap: 8px; }
-  .brand { display: none; }
   .mode-switch { margin-left: 0; }
   .mode-btn { padding: 6px 11px; }
 }
